@@ -1,0 +1,79 @@
+\documentclass{utsignal}
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{wrapfig}
+\usepackage{verbatim}
+\usepackage{fancyvrb}
+\usepackage{lscape}
+\usepackage{rotating}
+\usepackage{xepersian}
+\usepackage{listings}
+\usepackage{color}
+\usepackage[utf8]{inputenc}
+\usepackage{csquotes}
+
+\title{پروژه - فاز ۱ (راهنمای پایتون)}
+\course{سیگنال‌ها و سیستم‌ها}
+\author{\href{mailto:h.barkhordarpour@ut.ac.ir?subject=[SS\%20S98 A2]}{هدی برخوردارپور}، 
+\href{mailto:ranjbar.ali@ut.ac.ir?subject=[SS\%20S98 A2]\%20}{علی رنجبر}}
+%\lecturer{امیرمسعود ربیعی}
+\deadline{جمعه ۲۳ فروردین ۱۳۹۸، ساعت ۲۳:۵۵}
+\graphicspath{{./images/}}
+
+
+\begin{document}
+	\maketitle
+	\section*{خواندن فایل \lr{mp3}}
+	برای خواندن فایل \lr{mp3} در پایتون از تابع زیر استفاده کنید:
+	\begin{latin}
+		\begin{lstlisting}[language=Python]
+	from pydub import AudioSegment as audio 
+	import numpy as np 
+	
+	
+	def audioread(file_name):
+		sound = audio.from_mp3(file_name)
+		sample_rate = sound.frame_rate
+		channels = sound.channels
+		if channels == 1:
+			clip = np.array(sound.get_array_of_samples())
+		elif channels == 2:
+			sound = sound.split_to_mono()
+			channel_one = np.array(sound[0].get_array_of_samples())
+			channel_two = np.array(sound[0].get_array_of_samples())
+			clip = np.array([channel_one, channel_two])
+		return clip, sample_rate\end{lstlisting}
+	\end{latin}
+	برای استفاده از این تابع نیاز است تا کتابخانه‌ی \lr{audiosegment} را نصب کنید. این کتابخانه را می‌توانید به راحتی با \lr{pip} نصب کنید:
+	\begin{latin}
+		\begin{lstlisting}
+	pip install audiosegment\end{lstlisting}
+	\end{latin}
+
+	\section*{پیش‌پردازش}
+	در این قسمت برای گرفتن میانگین بین دو کانال و کم کردن مقدار \lr{DC} از تابع 	\lr{\lstinline[language=Python]{numpy.mean}} استفاده کنید. برای کاهش نرخ نمونه برداری از کد زیر استفاده کنید:
+	\begin{latin}
+		\begin{lstlisting}[language=Python]
+	from scipy import signal 
+	clip = signal.resample(clip, num)\end{lstlisting}
+	\end{latin}
+	ورودی دوم این تابع، تعداد نمونه‌های جدید را مشخص می‌کند. تعداد نمونه‌های جدید رابطه‌ی بسیار ساده‌ای با فرکانس نمونه‌برداری قدیمی و جدید و طول نمونه‌های سیگنال دارد.
+	\section*{اسپکتروگرام} \label{ssec:spectrogram}
+	برای بدست آوردن اسپکتروگرام همانند آنچه که در صورت پروژه خواسته شده، از کد زیر استفاده کنید:
+	\begin{latin}
+		\begin{lstlisting}[language=Python]
+	f, t, s = signal.spectrogram(clip, fs, window=('hamming'), nperseg=w, noverlap=noverlap, nfft=nfft)\end{lstlisting}
+	\end{latin}
+	دقت کنید که آنچه در صورت پروژه با اسم \lr{window} بیان شده است، در این کد با \lr{w} مشخص شده که همان پارامتر \lr{npreseg} است. بقیه پارامتر‌ها هم اسم با معادل آن‌ها در متلب هستند.
+	
+	\section*{پیک‌های محلی اسپکتروگرام} \label{ssec:local-peaks}
+	در این قسمت به جای \lstinline[language=Matlab]{circshif} متلب از \lr{\lstinline[language=Python]{numpy.roll}} استفاده کنید. نحوه‌ی استفاده از این تابع را در این \href{https://docs.scipy.org/doc/numpy/reference/generated/numpy.roll.html}{لینک} بخوانید. برای عملگر \lr{\&} می‌توانید از \lr{\lstinline[language=Python]{numpy.logical_and}} استفاده کنید.
+	
+	برای رسم تصویر پیک‌ها از کد زیر می‌توانید استفاده کنید:
+	\begin{latin}
+		\begin{lstlisting}[language=Python]
+	from matplotlib import pyplot as plt
+	plt.imshow(peaks, cmap=plt.cm.binary)\end{lstlisting}
+	\end{latin}
+\end{document}
